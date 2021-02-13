@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import datetime
+import pprint
 
 class Interface_View(ABC):
     """
@@ -43,10 +44,6 @@ class Interface_View(ABC):
         pass
 
     @abstractmethod
-    def add_sick_encounter():
-        pass
-
-    @abstractmethod
     def show_sick_encounter(list_of_sick_encounters:list):
         pass
 
@@ -72,18 +69,25 @@ class Interface_View(ABC):
         pass
 
     @abstractmethod
-    def show_person(list_of_people:list):
+    def show_person(person_deatils:str):
         """
             will display the person details and whether he is sick or not together with all his/her lab tests
         """
         pass
-
+    @abstractmethod
     def show_person_route(list_of_places:list):
         """
              will display person route
         """
         pass
-        
+
+    @abstractmethod
+    def operation_failed(msg:str):
+        """
+        will display failure message
+        """
+        pass
+
 class ViewConsole(Interface_View):
     def show_help():
         print("""
@@ -146,5 +150,66 @@ class ViewConsole(Interface_View):
         for isolated in list_of_isolated:
             print(isolated)
 
-## controller
-# 'show isolated' : show_isolated(['1 eden nathan 26081996 0527084637.....','2 ram rokach 5049196 0521....','3'])
+    def create_sick():
+        print('sick created')
+        pass
+    
+    def add_route_site(self):
+        print('route added')
+        pass
+   
+    def add_route_address():
+        print('route added')
+        pass
+
+    def add_sick_encounter():
+        print('sick encounter added')
+        pass
+
+    def show_sick_encounter(list_of_sick_encounters:list):
+        for sick_encounter in list_of_sick_encounters:
+            print(sick_encounter)
+        pass
+
+    def update_sick_encounter_details():
+        print('sick encounter details updated')
+        pass
+    
+    def update_lab_test():
+        print('lab test updated')
+        pass
+
+    def show_new_sick(list_of_sick:list):
+        for sick in list_of_sick:
+            print(sick)
+        pass
+
+    def show_stat(stats_details:dict):
+        """
+        @param stats_details: {
+                                total_sick: 134134,
+                                total_healed:234234,
+                                total_isolated:324324,
+                                sick_per_city:{
+                                                'cityName':num_of_sick
+                                                }
+                                }
+        """
+        pprint.pprint(stats_details)
+        pass
+
+    def show_person(person_deatils:str):
+        """
+            will display the person details and whether he is sick or not together with all his/her lab tests
+        """
+        print(person_deatils)
+        pass
+
+    def show_person_route(list_of_places:list):
+        """
+             will display person route
+        """
+        for place in list_of_places:
+            print(place)
+        pass
+
