@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import datetime
 
 class Interface_View(ABC):
     """
@@ -13,8 +14,77 @@ class Interface_View(ABC):
         """
         pass
 
+    @abstractmethod
+    def get_option_input():
+        pass
+    
+    @abstractmethod
+    def show_sick(list_of_sick:list):
+        pass
+
+    @abstractmethod
+    def show_isolated(list_of_isolated:list):
+        pass
+    
+    @abstractmethod
+    def create_sick():
+        pass
+    
+    @abstractmethod
+    def add_route_site():
+        pass
+
+    @abstractmethod
+    def add_route_address():
+        pass
+
+    @abstractmethod
+    def add_sick_encounter():
+        pass
+
+    @abstractmethod
+    def add_sick_encounter():
+        pass
+
+    @abstractmethod
+    def show_sick_encounter(list_of_sick_encounters:list):
+        pass
+
+    @abstractmethod
+    def update_sick_encounter_details():
+        pass
+    
+    @abstractmethod
+    def update_lab_test():
+        pass
+
+    @abstractmethod
+    def show_new_sick(list_of_sick:list):
+        pass
+
+    @abstractmethod
+    def show_stat(total_sick:int,total_healed:int,total_isolated:int,sick_per_city:dict):
+        """
+        @param sick_per_city: {
+                                'cityName':num_of_sick
+                                }
+        """
+        pass
+
+    @abstractmethod
+    def show_person(list_of_people:list):
+        """
+            will display the person details and whether he is sick or not together with all his/her lab tests
+        """
+        pass
+
+    def show_person_route(list_of_places:list):
+        """
+             will display person route
+        """
+        pass
+        
 class ViewConsole(Interface_View):
-    @staticmethod
     def show_help():
         print("""
         1.	Create-sick <id> <firstname> <lastname> <birthdate DD/MM/YYYY> phone mail city street house-number apartment house-residents
@@ -65,6 +135,16 @@ class ViewConsole(Interface_View):
             id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents
         """)
 
-    @staticmethod
     def get_option_input():
         return input('Please use a command')
+
+    def show_sick(list_of_sick:list):
+        for sick in list_of_sick:
+            print(sick)
+
+    def show_isolated(list_of_isolated:list):
+        for isolated in list_of_isolated:
+            print(isolated)
+
+## controller
+# 'show isolated' : show_isolated(['1 eden nathan 26081996 0527084637.....','2 ram rokach 5049196 0521....','3'])
