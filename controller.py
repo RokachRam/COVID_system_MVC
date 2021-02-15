@@ -1,5 +1,9 @@
 from model import *
 from view import Interface_View
+import sys
+debug=False
+if "-d" in sys.argv:
+    debug=True
 
 class Controller:
     def __init__(self, view:Interface_View):
@@ -11,36 +15,43 @@ class Controller:
 
     def start(self):
         while True:
-            option = self.view.get_option_input()
-            if option == 'Create-sick':
-                self.list_statistics()
-            elif option == 'Add-route-site':
+            option:list = self.view.get_option_input().split() # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
+            if option[0] == 'Create-sick':
+                self.create_sick(option[1:])
+                self.view.create_sick()
+            elif option[0] == 'Add-route-site':
                 self.display_three_cities_with_longest_names()
-            elif option == 'Add-route-address':
+            elif option[0] == 'Add-route-address':
                 self.display_county_with_max_communities()
-            elif option == 'Add-sick-encounter':
+            elif option[0] == 'Add-sick-encounter':
                 self.display_locations_with_more_than_one_category()
-            elif option == 'Show-sick-encounter':
+            elif option[0] == 'Show-sick-encounter':
                 self.advanced_search()
-            elif option == 'Update-sick-encounter-details':
+            elif option[0] == 'Update-sick-encounter-details':
                 self.advanced_search()
-            elif option == 'Update-lab-test':
+            elif option[0] == 'Update-lab-test':
                 self.advanced_search()
-             elif option == 'Show-new-sick':
+            elif option[0] == 'Show-new-sick':
                 self.advanced_search()
-            elif option == 'Show-stat':
+            elif option[0] == 'Show-stat':
                 self.advanced_search()
-            elif option == 'Show-person':
+            elif option[0] == 'Show-person':
                 self.advanced_search()
-            elif option == 'Show-person-route':
+            elif option[0] == 'Show-person-route':
                 self.advanced_search()
-            elif option == 'Show-sick':
+            elif option[0] == 'Show-sick':
                 self.advanced_search()
-            elif option == 'Show-isolated':
+            elif option[0] == 'Show-isolated':
                 self.advanced_search()
             else:
                 self.view.operation_failed()
 
+    def create_sick(self,args:list): # args: ["id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
+        home=Home(args[6],args[7],args[8],args[9],args[10])
+        person=Person(args[4],args[1],args[2],args[0],args[3],args[5],home,sick=True, interviewed=True,isolation_begin_date=datetime.datetime.now().date)
+        self.list_of_patients.append(person)
+        if debug:
+            print(person.firstName,"added to list_of_patients")
 
     def get_active_suspect(self) -> list:
         """
