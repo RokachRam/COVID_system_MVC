@@ -23,7 +23,7 @@ class Site:
 
 class Person:
     def __init__(self, phone: str, firstName: str, surName: str, id: int = None, birthdate: datetime.date = None,
-                 mail: str = None, address: Home = None, sick: bool = False, interviewed:bool = False,
+                 mail: str = None, address: Home = None, sick: bool = None, interviewed:bool = False,
                  isolation_begin_date: datetime.date = None) -> None:
         self.phone = phone  # key value
         self.firstName = firstName
