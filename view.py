@@ -9,58 +9,58 @@ class Interface_View(ABC):
     the UI to be a web app or even a mobile app.  
     """
     @abstractmethod
-    def show_help():
+    def show_help(self):
         """
         display the command list and their format
         """
         pass
 
     @abstractmethod
-    def get_option_input():
+    def get_option_input(self):
         pass
     
     @abstractmethod
-    def show_sick(list_of_sick:list):
+    def show_sick(self, list_of_sick:list):
         pass
 
     @abstractmethod
-    def show_isolated(list_of_isolated:list):
+    def show_isolated(self, list_of_isolated:list):
         pass
     
     @abstractmethod
-    def create_sick():
+    def create_sick(self):
         pass
     
     @abstractmethod
-    def add_route_site():
+    def add_route_site(self):
         pass
 
     @abstractmethod
-    def add_route_address():
+    def add_route_address(self):
         pass
 
     @abstractmethod
-    def add_sick_encounter():
+    def add_sick_encounter(self):
         pass
 
     @abstractmethod
-    def show_sick_encounter(list_of_sick_encounters:list):
+    def show_sick_encounter(self, list_of_sick_encounters:list):
         pass
 
     @abstractmethod
-    def update_sick_encounter_details():
+    def update_sick_encounter_details(self):
         pass
     
     @abstractmethod
-    def update_lab_test():
+    def update_lab_test(self):
         pass
 
     @abstractmethod
-    def show_new_sick(list_of_sick:list):
+    def show_new_sick(self, list_of_sick:list):
         pass
 
     @abstractmethod
-    def show_stat(total_sick:int,total_healed:int,total_isolated:int,sick_per_city:dict):
+    def show_stat(self, total_sick:int,total_healed:int,total_isolated:int,sick_per_city:dict):
         """
         @param sick_per_city: {
                                 'cityName':num_of_sick
@@ -69,27 +69,27 @@ class Interface_View(ABC):
         pass
 
     @abstractmethod
-    def show_person(person_deatils:str):
+    def show_person(self, person_deatils:str):
         """
             will display the person details and whether he is sick or not together with all his/her lab tests
         """
         pass
     @abstractmethod
-    def show_person_route(list_of_places:list):
+    def show_person_route(self, list_of_places:list):
         """
              will display person route
         """
         pass
 
     @abstractmethod
-    def operation_failed(msg:str):
+    def operation_failed(self, msg:str):
         """
         will display failure message
         """
         pass
 
 class ViewConsole(Interface_View):
-    def show_help():
+    def show_help(self):
         print("""
         1.	Create-sick <id> <firstname> <lastname> <birthdate DD/MM/YYYY> phone mail city street house-number apartment house-residents
             if the same id used more than once, the details of the last run will override the previous one
@@ -139,18 +139,18 @@ class ViewConsole(Interface_View):
             id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents
         """)
 
-    def get_option_input():
+    def get_option_input(self):
         return input('Please use a command')
 
-    def show_sick(list_of_sick:list):
+    def show_sick(self, list_of_sick:list):
         for sick in list_of_sick:
             print(sick)
 
-    def show_isolated(list_of_isolated:list):
+    def show_isolated(self, list_of_isolated:list):
         for isolated in list_of_isolated:
             print(isolated)
 
-    def create_sick():
+    def create_sick(self):
         print('sick created')
         pass
     
@@ -158,33 +158,33 @@ class ViewConsole(Interface_View):
         print('route added')
         pass
    
-    def add_route_address():
+    def add_route_address(self):
         print('route added')
         pass
 
-    def add_sick_encounter():
+    def add_sick_encounter(self):
         print('sick encounter added')
         pass
 
-    def show_sick_encounter(list_of_sick_encounters:list):
+    def show_sick_encounter(self, list_of_sick_encounters:list):
         for sick_encounter in list_of_sick_encounters:
             print(sick_encounter)
         pass
 
-    def update_sick_encounter_details():
+    def update_sick_encounter_details(self):
         print('sick encounter details updated')
         pass
     
-    def update_lab_test():
+    def update_lab_test(self):
         print('lab test updated')
         pass
 
-    def show_new_sick(list_of_sick:list):
+    def show_new_sick(self, list_of_sick:list):
         for sick in list_of_sick:
             print(sick)
         pass
 
-    def show_stat(stats_details:dict):
+    def show_stat(self, stats_details:dict):
         """
         @param stats_details: {
                                 total_sick: 134134,
@@ -198,14 +198,14 @@ class ViewConsole(Interface_View):
         pprint.pprint(stats_details)
         pass
 
-    def show_person(person_deatils:str):
+    def show_person(self, person_deatils:str):
         """
             will display the person details and whether he is sick or not together with all his/her lab tests
         """
         print(person_deatils)
         pass
 
-    def show_person_route(list_of_places:list):
+    def show_person_route(self, list_of_places:list):
         """
              will display person route
         """
