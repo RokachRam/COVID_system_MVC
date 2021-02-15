@@ -16,9 +16,9 @@ class Home(Address):
 
 
 class Site:
-    def __init__(self, siteName, city: str = None, street: str = None, number: int = None) -> None:
+    def __init__(self, siteName, address:Address) -> None:
         self.siteName = siteName
-        self.siteAddress = Address(city, street, number) if city and street and number else None
+        self.siteAddress = address # decoupling, in case address will add floor (for example), site won't be affected
 
 
 class Person:
@@ -97,11 +97,11 @@ class Suspect(Person):
                          # it's because of him
 
 
-class SickInAddress:
-    def __init__(self, sick: Person, address: Address, visit_date: datetime.date):
+class SickInSite:
+    def __init__(self, sick: Person, site:Site, visit_datetime: datetime):
         if sick.sick:
             self.sick = sick
-            self.address = address
-            self.visit_date = visit_date
+            self.site = site
+            self.visit_datetime = visit_datetime
         else:
             raise Exception("The person must be sick")
