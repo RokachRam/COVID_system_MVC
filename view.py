@@ -84,6 +84,10 @@ class Interface_View(ABC):
         pass
 
 class ViewConsole(Interface_View):
+    def __init__(self,commands_file_path) -> None:
+        super().__init__()
+        self.commands= open(commands_file_path)
+            
     def show_help(self):
         print("""
         1.	Create-sick <id> <firstname> <lastname> <birthdate DD/MM/YYYY> phone mail city street house-number apartment house-residents
@@ -135,7 +139,12 @@ class ViewConsole(Interface_View):
         """)
 
     def get_option_input(self):
-        return input('Please use a command')
+        """
+        האפליקציה אותה תכתבו צריכה לאפשר עבודה בעזרת קבלת קובץ פקודות (כל שורה בקובץ תהווה פקודה, תיאור ומבנה הפקודות:
+        """
+        command=next(self.commands)
+        print('$#$# COMMAND:',command)
+        return command
 
     def show_sick(self, list_of_sick:list):
         for sick in list_of_sick:
@@ -205,6 +214,6 @@ class ViewConsole(Interface_View):
         pass
 
     def operation_failed(self, msg: str):
-        print("msg")
+        print(msg)
         pass
 

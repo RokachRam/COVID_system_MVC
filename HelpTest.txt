@@ -1,0 +1,20 @@
+Show-help
+Create-sick 123 Foo Bar 2020-04-26 012-3456789 sick@corona.com NewYork MyStreet 1 2 3
+Add-route-site 123 2020-04-26 11:00 Ruppin-college
+Add-route-site 123 2020-04-26 11:30 Supermarket
+Add-route-address 123 2020-04-26 13:00 Friend-home TelAviv Dizengof 4
+Add-route-address 123 2020-04-26 14:00 Friend-home PetachTikva Zabutinski 50
+Add-route-site 123 2020-04-26 19:00 TelAviv-Beach
+Add-sick-encounter 123 moshe moshe 050500500
+Add-sick-encounter 123 David David 052520540
+Show-person 123
+Show-person-route 123
+Add-sick-encounter 123 Hello World 314-1592654
+Show-sick-encounter
+Update-sick-encounter-details 0 777 Hello World 2020-04-29 314-1592654 encounter@corona.com Washington ThatStreet 3 4 5
+Update-lab-test 1 1 777 01-04-2020 true
+Show-sick
+Show-isolated
+Show-stat sick, healed, isolated, sick-per-city
+Show-new-sick
+Show-new-sick

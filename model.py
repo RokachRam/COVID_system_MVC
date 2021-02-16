@@ -16,15 +16,15 @@ class Home(Address):
 
 
 class Site:
-    def __init__(self, siteName, address:Address) -> None:
+    def __init__(self, siteName, address:Address=None) -> None:
         self.siteName = siteName
         self.siteAddress = address # decoupling, in case address will add floor (for example), site won't be affected
 
 
 class Person:
-    def __init__(self, phone: str, firstName: str, surName: str, id: int = None, birthdate: datetime.date = None,
+    def __init__(self, phone: str, firstName: str, surName: str, id: int = None, birthdate: datetime = None,
                  mail: str = None, home: Home = None, sick: bool = None, interviewed:bool = False,
-                 isolation_begin_date: datetime.date = None) -> None:
+                 isolation_begin_date: datetime = None) -> None:
         self.phone = phone  # key value
         self.firstName = firstName
         self.surName = surName
@@ -38,7 +38,7 @@ class Person:
         pass
 
     def send_to_isolation(self):
-        self.isolation_begin_date = datetime.datetime.now().date
+        self.isolation_begin_date = datetime.datetime.now()
 
 
 
@@ -52,7 +52,7 @@ class Laboratory:
 
 
 class Test:
-    def __init__(self, person: Person, lab: Laboratory, test_date: datetime.date, result_date: datetime.date = None,
+    def __init__(self, person: Person, lab: Laboratory, test_date: datetime, result_date: datetime = None,
                  test_result: bool = None):
 
         self.test_result = test_result
@@ -63,7 +63,7 @@ class Test:
         self.test_date = test_date
         self.result_date = result_date
 
-    def update_test_result(self, test_result: bool, result_date: datetime.date = datetime.datetime.now().date):
+    def update_test_result(self, test_result: bool, result_date: datetime = datetime.datetime.now()):
         self.test_result = test_result
         self.result_date = result_date
 
@@ -76,8 +76,8 @@ class Suspect(Person):
         Suspect.class_counter += 1
         self.infector = infector
 
-    def update_suspect_params(self, id: int = None, birthdate: datetime.date = None, mail: str = None,
-                              address: Home = None, sick: bool = False, isolation_begin_date: datetime.date = None):
+    def update_suspect_params(self, id: int = None, birthdate: datetime = None, mail: str = None,
+                              address: Home = None, sick: bool = False, isolation_begin_date: datetime = None):
         self.id = id
         self.birthdate = birthdate
         self.mail = mail
@@ -92,7 +92,7 @@ class Suspect(Person):
 
 class SickInSite:
     def __init__(self, sick: Person, site:Site, visit_datetime: datetime):
-        if sick.sick:
+        if hasattr(sick,'sick'):
             self.sick = sick
             self.site = site
             self.visit_datetime = visit_datetime
