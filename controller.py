@@ -10,7 +10,9 @@ if "-d" in sys.argv:
 class Controller:
     def __init__(self, view: Interface_View,container:I_Container):
         self.view = view
-        self.container=container # can be DB, can be pythonish, can be anything. must support all I_Container functions
+        self.container=container
+        self.list_of_new_patients = list[Person]
+        # can be DB, can be pythonish, can be anything. must support all I_Container functions
         # self.list_of_patients = list[Person]
         # self.list_of_sick_in_Site = list[SickInSite]
         # self.list_of_tests = list[Test]
@@ -49,9 +51,11 @@ class Controller:
                 else:
                     failed_msg = "No such test / missing details"
             elif option[0] is 'Show-new-sick':
-                self.advanced_search()
+                result = self.show_new_sick()
+                self.view.show_new_sick(result)
             elif option[0] is 'Show-stat':
-                self.advanced_search()
+                result = self.show_stat(option[1:])
+                self.view.show_stat(result)
             elif option[0] is 'Show-person':
                 self.advanced_search()
             elif option[0] is 'Show-person-route':
@@ -70,11 +74,12 @@ class Controller:
     # args: ["id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
     def create_sick(self, args: list):
         # removes the person in case id is shown twice
-        self.container.remove_patient(self.container.get_person_by_id(args[4]))
+        self.container.remove_patient_by_id(self.container.get_person_by_id(args[4]))
         home = Home(args[6], args[7], args[8], args[9], args[10])
         person = Person(args[4], args[1], args[2], args[0], args[3], args[5], home,
                         sick=True, interviewed=True, isolation_begin_date=datetime.datetime.now().date)
         self.container.save_patient(person)
+        self.list_of_new_patients.append(person) # this list reset every run of this code (used in show_new_sick)
         if debug:
             print(person.firstName, "added to list_of_patients")
 
@@ -134,6 +139,47 @@ class Controller:
                 lab_test.update_test_result(args[4], args[3])
                 return self.container.save_test(lab_test)
         return False
+
+    def show_new_sick(self): # show in format "id", "firstname", "lastname", "birthdate", "phone", "mail", "city", "street", house-number, apartment, house-residents
+        list_to_return = []
+        for sick in self.list_of_new_patients:
+            string = str(sick.id) + " " + sick.firstName + " " + sick.surName +\
+                " " + str(sick.birthdate) + " " + sick.phone + \
+                " " + sick.mail + " " + sick.home.city + " " + sick.home.street + " " + str(sick.home.number) +\
+                str(sick.home.apartment_number) + " " + str(sick.home.house_residents)
+            list_to_return.append(string)
+        return list_to_return
+
+    def show_stat(self, args:list): # args could be: sicks, healed, isolated, sick-per-city
+        isolation_period = 14
+        stats_dict = {}
+        for arg in args:
+            if arg is "sicks,":
+                sicks = [x for x in self.container.get_list_of_patients() if x.sick]
+                stats_dict["sicks"] = len(sicks)
+            if arg is "healed,":
+                not_sick = [x for x in self.container.get_list_of_patients() if not x.sick]
+                all_tests = self.container.get_list_of_tests()
+                healed_list = []
+                for x in not_sick:
+                    for test in all_tests:
+                        if (test.test_result and test.person.id is x.id):
+                            healed_list.append(x)
+                stats_dict["healed"] = len(healed_list)
+            if arg is "isolated,":
+                time_now = datetime.datetime.now()
+                isolated = [x for x in self.container.get_list_of_patients() if (time_now-x.isolation_begin_date) < isolation_period]
+                stats_dict["isolated"] = len(isolated)
+            if arg is "sick-per-city,":
+                city_sick_dict = {}
+                sicks = [x for x in self.container.get_list_of_patients() if x.sick]
+                for sick in sicks:
+                    if sick.home.city not in city_sick_dict:
+                        city_sick_dict[sick.home.city] =0
+                    city_sick_dict[sick.home.city] +=1
+                stats_dict["sick-per-city"] = city_sick_dict
+        return stats_dict
+
 
     # def get_active_suspect(self) -> list:
     #     """

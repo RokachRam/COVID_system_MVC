@@ -60,12 +60,7 @@ class Interface_View(ABC):
         pass
 
     @abstractmethod
-    def show_stat(self, total_sick:int,total_healed:int,total_isolated:int,sick_per_city:dict):
-        """
-        @param sick_per_city: {
-                                'cityName':num_of_sick
-                                }
-        """
+    def show_stat(self, stat_dict:dict):
         pass
 
     @abstractmethod
@@ -187,18 +182,11 @@ class ViewConsole(Interface_View):
             print(sick)
         pass
 
-    def show_stat(self, stats_details:dict):
-        """
-        @param stats_details: {
-                                total_sick: 134134,
-                                total_healed:234234,
-                                total_isolated:324324,
-                                sick_per_city:{
-                                                'cityName':num_of_sick
-                                                }
-                                }
-        """
-        pprint.pprint(stats_details)
+    def show_stat(self, stat_dict:dict):
+        for key in stat_dict:
+            print("** BEGIN "  + key + " **")
+            pprint.pprint(stat_dict[key])
+            print("** END " + key + " **")
         pass
 
     def show_person(self, person_deatils:str):
