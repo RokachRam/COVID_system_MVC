@@ -1,113 +1,122 @@
 from model import *
 from view import Interface_View
+from container import I_Container
 import sys
-debug=False
+debug = False
 if "-d" in sys.argv:
-    debug=True
+    debug = True
+
 
 class Controller:
-    def __init__(self, view:Interface_View):
+    def __init__(self, view: Interface_View,container:I_Container):
         self.view = view
-        self.list_of_patients = list[Person]
-        self.list_of_sick_in_Site = list[SickInSite]
-        self.list_of_tests = list[Test]
+        self.container=container # can be DB, can be pythonish, can be anything. must support all I_Container functions
+        # self.list_of_patients = list[Person]
+        # self.list_of_sick_in_Site = list[SickInSite]
+        # self.list_of_tests = list[Test]
         pass
 
     def start(self):
         while True:
-            option:list = self.view.get_option_input().split() # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
-            if option[0] == 'Create-sick':
+            # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
+            option: list = self.view.get_option_input().split()
+            failed_msg = None
+            if option[0] is 'Create-sick':
                 self.create_sick(option[1:])
                 self.view.create_sick()
-            elif option[0] == 'Add-route-site':
+            elif option[0] is 'Add-route-site':
                 self.add_route_site(option[1:])
                 self.view.add_route_site()
-            elif option[0] == 'Add-route-address':
+            elif option[0] is 'Add-route-address':
                 self.add_route_site(option[1:])
                 self.view.add_route_address()
-            elif option[0] == 'Add-sick-encounter':
-                self.add_sick_encounter(option[1:])
-                self.view.add_sick_encounter()
-            elif option[0] == 'Show-sick-encounter':
+            elif option[0] is 'Add-sick-encounter':
+                if self.add_sick_encounter(option[1:]):
+                    self.view.add_sick_encounter()
+                else:
+                    failed_msg="No infector, wrong encounter details"
+            elif option[0] is 'Show-sick-encounter':
                 result = self.show_sick_encounter()
                 self.view.show_sick_encounter(result)
-            elif option[0] == 'Update-sick-encounter-details':
+            elif option[0] is 'Update-sick-encounter-details':
                 if self.update_sick_encounter_details(option[1:]):
                     self.view.update_sick_encounter_details()
                 else:
-                    self.view.operation_failed("There is no such encounter / missing details")
-            elif option[0] == 'Update-lab-test':
+                    failed_msg = "There is no such encounter / missing details"
+            elif option[0] is 'Update-lab-test':
                 if self.update_lab_test(option[1:]):
                     self.view.update_lab_test()
                 else:
-                    self.view.operation_failed("No such test / missing details")
-            elif option[0] == 'Show-new-sick':
+                    failed_msg = "No such test / missing details"
+            elif option[0] is 'Show-new-sick':
                 self.advanced_search()
-            elif option[0] == 'Show-stat':
+            elif option[0] is 'Show-stat':
                 self.advanced_search()
-            elif option[0] == 'Show-person':
+            elif option[0] is 'Show-person':
                 self.advanced_search()
-            elif option[0] == 'Show-person-route':
+            elif option[0] is 'Show-person-route':
                 self.advanced_search()
-            elif option[0] == 'Show-sick':
+            elif option[0] is 'Show-sick':
                 self.advanced_search()
-            elif option[0] == 'Show-isolated':
+            elif option[0] is 'Show-isolated':
                 self.advanced_search()
             else:
-                self.view.operation_failed()
+                failed_msg="unknown command"
 
-    def create_sick(self,args:list): # args: ["id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
-        self.list_of_patients.remove(self.find_person_by_id(args[4])) #removes the person in case id is shown twice
-        home=Home(args[6],args[7],args[8],args[9],args[10])
-        person=Person(args[4],args[1],args[2],args[0],args[3],args[5],home,sick=True, interviewed=True,isolation_begin_date=datetime.datetime.now().date)
-        self.list_of_patients.append(person)
+            if failed_msg:
+                self.view.operation_failed(failed_msg)
+                failed_msg = None
+
+    # args: ["id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
+    def create_sick(self, args: list):
+        # removes the person in case id is shown twice
+        self.container.remove_patient(self.container.get_person_by_id(args[4]))
+        home = Home(args[6], args[7], args[8], args[9], args[10])
+        person = Person(args[4], args[1], args[2], args[0], args[3], args[5], home,
+                        sick=True, interviewed=True, isolation_begin_date=datetime.datetime.now().date)
+        self.container.save_patient(person)
         if debug:
-            print(person.firstName,"added to list_of_patients")
+            print(person.firstName, "added to list_of_patients")
 
-    def find_person_by_id(self, id:int):
-        for person in self.list_of_patients:
-            if id is person.id:
-                return person
-
-    def find_suspect_by_encounter_id(self, encounter_id:int):  # used to update a suspect's details
-        for suspect in self.list_of_patients:
-            if hasattr(suspect, 'encounter_id'):
-                if suspect.encounter_id == encounter_id:
-                    return suspect
-
-    def add_route_site(self, args:list): # args: ["id" "01/04/2020" "10:00" "sitename" optional: "city" "street" "number"]
-        date_time = datetime.datetime.strptime(args[1] + args[2], '%Y/%m/%d%H:%M')
-        if len(args) == 4 :
+    # args: ["id" "01/04/2020" "10:00" "sitename" optional: "city" "street" "number"]
+    def add_route_site(self, args: list):
+        date_time = datetime.datetime.strptime(
+            args[1] + args[2], '%Y/%m/%d%H:%M')
+        if len(args) is 4:
             site = Site(args[3])
         else:
             address = Address(args[4], args[5], args[6])
             site = Site(args[3], address)
-        route_site = SickInSite(self.find_person_by_id(args[0]), site, date_time)
-        self.list_of_sick_in_Site.append(route_site)
+        route_site = SickInSite(self.container.get_person_by_id(args[0]), site, date_time)
+        self.container.save_sick_in_site(route_site)
 
-    def add_sick_encounter(self, args:list): # "sick-id" "firstname" "lastname" "phone"
-        sick = self.find_person_by_id(args[0])
+    # "sick-id" "firstname" "lastname" "phone"
+    def add_sick_encounter(self, args: list):
+        sick = self.container.get_person_by_id(args[0])
         if not sick:
-            self.view.operation_failed("No infector, wrong encounter details")
-            return
+            return False
         suspect = Suspect(sick, args[3], args[1], args[2])
-        self.list_of_patients.append(suspect)
+        self.container.save_patient(suspect)
+        return True
 
-    def show_sick_encounter(self): # encounter-id, sick-id, sick-firstname, sick-lastname, firstname lastname phone
+    # encounter-id, sick-id, sick-firstname, sick-lastname, firstname lastname phone
+    def show_sick_encounter(self):
         list_to_return = []
-        suspects = [x for x in self.list_of_patients if x.id is None]
+        suspects = [x for x in self.container.get_list_of_patients if x.id is None]
         for suspect in suspects:
             string = str(suspect.encounter_id) + " " + str(suspect.infector.id) + " " + suspect.infector.firstName +\
-            " " + suspect.infector.surName + " " + suspect.firstName + " " + suspect.surName + " " + suspect.phone
+                " " + suspect.infector.surName + " " + suspect.firstName + \
+                " " + suspect.surName + " " + suspect.phone
             list_to_return.append(string)
-
         return list_to_return
 
-    def update_sick_encounter_details(self, args:list): # encounter-id personid firstname lastname birthdate phone mail city street house-number apartment house-residents 
+    # encounter-id personid firstname lastname birthdate phone mail city street house-number apartment house-residents
+    def update_sick_encounter_details(self, args: list):
         encounter_id = args[0]
-        suspect = self.find_suspect_by_encounter_id(encounter_id)
+        suspect = self.container.get_suspect_by_encounter_id(encounter_id)
         if not suspect:
             return False
+        self.container.remove_patient_by_id(suspect.id)
         suspect.id = args[1]
         suspect.firstName = args[2]
         suspect.surName = args[3]
@@ -115,27 +124,19 @@ class Controller:
         suspect.phone = args[5]
         suspect.mail = args[6]
         suspect.home = Home(args[7], args[8], args[9], args[10], args[11])
+        self.container.save_patient(suspect)
         return True
 
-    def update_lab_test(self, args:list): # labid testid personid date result 
-        for lab_test in self.list_of_tests:
-            if (lab_test.test_id == args[1] and lab_test.lab.lab_id == args[0] and lab_test.person.id == args[2]):
+    def update_lab_test(self, args: list):  # labid testid personid date result
+        for lab_test in self.container.get_list_of_tests:
+            if (lab_test.test_id is args[1] and lab_test.lab.lab_id is args[0] and lab_test.person.id is args[2]):
+                self.container.remove_test_by_test_id_and_lab_id(lab_test.test_id,lab_test.lab.lab_id)
                 lab_test.update_test_result(args[4], args[3])
-                return True
+                return self.container.save_test(lab_test)
         return False
 
-
-
-
-
-
-
-
-
-
-
-    def get_active_suspect(self) -> list:
-        """
-        :return: a list of suspects who had no tests
-        """
-        return [x for x in self.list_of_patients if x.sick is None]
+    # def get_active_suspect(self) -> list:
+    #     """
+    #     :return: a list of suspects who had no tests
+    #     """
+    #     return [x for x in self.container.get_list_of_patients if x.sick is None]

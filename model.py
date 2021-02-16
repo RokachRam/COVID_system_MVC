@@ -50,8 +50,6 @@ class Laboratory:
         self.lab_id = Laboratory.class_counter
         Laboratory.class_counter += 1
 
-    pass
-
 
 class Test:
     def __init__(self, person: Person, lab: Laboratory, test_date: datetime.date, result_date: datetime.date = None,
@@ -64,12 +62,10 @@ class Test:
         self.test_id = lab.test_counter
         self.test_date = test_date
         self.result_date = result_date
-        pass
 
     def update_test_result(self, test_result: bool, result_date: datetime.date = datetime.datetime.now().date):
         self.test_result = test_result
         self.result_date = result_date
-        pass
 
 
 class Suspect(Person):
@@ -101,4 +97,4 @@ class SickInSite:
             self.site = site
             self.visit_datetime = visit_datetime
         else:
-            raise Exception("The person must be sick")
+            raise Exception("SickInSite: person must be sick")
