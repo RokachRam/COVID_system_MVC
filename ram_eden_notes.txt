@@ -8,3 +8,4 @@
 4. when a update-lab-test command happens - update both test list and person.sick
 
 5. validate arguments
+6. add checks to failed operations on controller-view integration (like we did in Update-sick-encounter-details)

@@ -167,6 +167,9 @@ class ViewConsole(Interface_View):
         pass
 
     def show_sick_encounter(self, list_of_sick_encounters:list):
+        if not list_of_sick_encounters:
+            print("No sick encounters")
+            return
         for sick_encounter in list_of_sick_encounters:
             print(sick_encounter)
         pass
@@ -211,5 +214,9 @@ class ViewConsole(Interface_View):
         """
         for place in list_of_places:
             print(place)
+        pass
+
+    def operation_failed(self, msg: str):
+        print("msg")
         pass
 

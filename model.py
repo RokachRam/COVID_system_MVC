@@ -23,7 +23,7 @@ class Site:
 
 class Person:
     def __init__(self, phone: str, firstName: str, surName: str, id: int = None, birthdate: datetime.date = None,
-                 mail: str = None, address: Home = None, sick: bool = None, interviewed:bool = False,
+                 mail: str = None, home: Home = None, sick: bool = None, interviewed:bool = False,
                  isolation_begin_date: datetime.date = None) -> None:
         self.phone = phone  # key value
         self.firstName = firstName
@@ -31,40 +31,37 @@ class Person:
         self.id = id
         self.birthdate = birthdate
         self.mail = mail
-        self.address = address
+        self.home = home
         self.sick = sick
         self.interviewed = interviewed
         self.isolation_begin_date = isolation_begin_date
-        self.infected_by = None
         pass
 
     def send_to_isolation(self):
         self.isolation_begin_date = datetime.datetime.now().date
 
-    def set_infected_by(self, infected_by):
-        self.infected_by = infected_by  # instance of Person(self) type
 
 
 class Laboratory:
     class_counter = 0
+    test_counter = 0
 
     def __init__(self):
-        self.labId = Laboratory.class_counter
+        self.lab_id = Laboratory.class_counter
         Laboratory.class_counter += 1
 
     pass
 
 
 class Test:
-    class_counter = 0
-
     def __init__(self, person: Person, lab: Laboratory, test_date: datetime.date, result_date: datetime.date = None,
                  test_result: bool = None):
-        self.test_id = Test.class_counter
-        Test.class_counter += 1
+
         self.test_result = test_result
         self.person = person
         self.lab = lab
+        lab.test_counter +=1
+        self.test_id = lab.test_counter
         self.test_date = test_date
         self.result_date = result_date
         pass
