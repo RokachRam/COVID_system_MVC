@@ -2,6 +2,7 @@ from model import *
 from view import Interface_View
 from data_access import IDataAccess
 from typing import List
+import pprint
 import sys
 debug = False
 if "-d" in sys.argv:
@@ -19,6 +20,16 @@ class Controller:
     def start(self):
         while True:
             # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
+            if debug:
+                print("-- debug --")
+                print("patients:")
+                pprint.pprint([vars(x) for x in self.container.read_list_of_patients()])
+                print("sick_in_site:")
+                pprint.pprint([vars(x) for x in self.container.read_list_of_sick_in_site()])
+                print("tests:",)
+                pprint.pprint([vars(x) for x in self.container.read_list_of_tests()])
+                print("-- debug --")
+
             option: list = self.view.get_option_input().split()
             failed_msg = None
             if not option:
@@ -26,8 +37,11 @@ class Controller:
                 self.view.operation_failed(failed_msg)
                 continue
             if option[0] == 'Create-sick':
-                self.create_sick(option[1:])
-                self.view.create_sick()
+                result=self.create_sick(option[1:])
+                if not result:
+                    failed_msg="create sick failed"
+                else:
+                    self.view.create_sick()
             elif option[0] == 'Add-route-site':
                 self.add_route_site(option[1:])
                 self.view.add_route_site()
@@ -38,7 +52,7 @@ class Controller:
                 if self.add_sick_encounter(option[1:]):
                     self.view.add_sick_encounter()
                 else:
-                    failed_msg="No infector, wrong encounter details"
+                    failed_msg="No infector \ wrong encounter details"
             elif option[0] == 'Show-sick-encounter':
                 result = self.show_sick_encounter()
                 self.view.show_sick_encounter(result)
@@ -75,34 +89,42 @@ class Controller:
     # args: ["id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
     def create_sick(self, args: list):
         # removes the person in case id is shown twice
-        self.container.delete_patient_by_id(args[4])
-        home = Home(args[6], args[7], args[8], args[9], args[10])
-        person = Person(args[4], args[1], args[2], args[0], args[3], args[5], home,
-                        sick=True, interviewed=True, isolation_begin_date=datetime.datetime.now())
-        self.container.create_patient(person)
-        self.list_of_new_patients.append(person) # this list reset every run of this code (used in show_new_sick)
+        id=args[0]
+        firstname=args[1]
+        lastname=args[2]
+        birthdate = datetime.datetime.strptime(args[3], '%Y-%m-%d')
+        phone=args[4]
+        mail=args[5]
+        city=args[6]
+        street=args[7]
+        house_num=args[8]
+        aptmnt=args[9]
+        house_res=args[10]
+        return self.container.create_patient(phone,firstname,lastname,id,birthdate,mail,city,street,house_num,aptmnt,house_res,sick=True)
 
     # args: ["id" "01/04/2020" "10:00" "sitename" optional: "city" "street" "number"]
     def add_route_site(self, args: list):
         date_time = datetime.datetime.strptime(
             args[1] + args[2], '%Y-%m-%d%H:%M')
-        if len(args) == 4:
-            site = Site(args[3])
-        else:
-            address = Address(args[4], args[5], args[6])
-            site = Site(args[3], address)
-        sick_person=self.container.get_person_by_id(args[0])
-        route_site = SickInSite(sick_person, site, date_time)
-        self.container.create_sick_in_site(route_site)
+        id=args[0]
+        site_name=args[3]
+        city=None
+        street=None
+        number=None
+        if len(args) > 4:
+            city=args[4]
+            street=args[5]
+            number=args[6]
+        
+        return self.container.create_sick_in_site(id,site_name,date_time,city,street,number)
 
     # "sick-id" "firstname" "lastname" "phone"
     def add_sick_encounter(self, args: list):
-        sick = self.container.get_person_by_id(args[0])
-        if not sick:
-            return False
-        suspect = Suspect(sick, args[3], args[1], args[2])
-        self.container.create_patient(suspect)
-        return True
+        sick_id=args[0]
+        first_name=args[1]
+        last_name=args[2]
+        phone=args[3]
+        return self.container.create_sick_encounter(sick_id,first_name,last_name,phone)
 
     # encounter-id, sick-id, sick-firstname, sick-lastname, firstname lastname phone
     def show_sick_encounter(self):
@@ -118,27 +140,26 @@ class Controller:
     # encounter-id personid firstname lastname birthdate phone mail city street house-number apartment house-residents
     def update_sick_encounter_details(self, args: list):
         encounter_id = args[0]
-        suspect = self.container.get_suspect_by_encounter_id(encounter_id)
-        if not suspect:
-            return False
-        self.container.delete_patient_by_id(suspect.id)
-        suspect.id = args[1]
-        suspect.firstName = args[2]
-        suspect.surName = args[3]
-        suspect.birthdate = args[4]
-        suspect.phone = args[5]
-        suspect.mail = args[6]
-        suspect.home = Home(args[7], args[8], args[9], args[10], args[11])
-        self.container.create_patient(suspect)
-        return True
+        sick_id = args[1]
+        firstName = args[2]
+        surName = args[3]
+        birthdate = datetime.datetime.strptime(args[4], '%Y-%m-%d')
+        phone = args[5]
+        mail = args[6]
+        city=args[7]
+        street=args[8]
+        number=args[9]
+        apt_num=args[10]
+        house_res=args[11]
+        return self.container.update_sick_encounter_details(encounter_id, sick_id,firstName,surName,birthdate,phone,mail,city,street,number,apt_num,house_res)
 
     def update_lab_test(self, args: list):  # labid testid personid date result
-        for lab_test in self.container.read_list_of_tests:
-            if (lab_test.test_id == args[1] and lab_test.lab.lab_id == args[0] and lab_test.person.id == args[2]):
-                self.container.delete_test_by_test_id_and_lab_id(lab_test.test_id,lab_test.lab.lab_id)
-                lab_test.update_test_result(args[4], args[3])
-                return self.container.create_test(lab_test)
-        return False
+        test_id=args[1]
+        lab_id=args[0]
+        person_id=args[2]
+        result_date=args[3]
+        result=args[4]
+        return self.container.update_test_result(test_id,lab_id,person_id,result_date,result)
 
     def show_new_sick(self): # show in format "id", "firstname", "lastname", "birthdate", "phone", "mail", "city", "street", house-number, apartment, house-residents
         list_to_return = []

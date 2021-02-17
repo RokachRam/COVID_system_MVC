@@ -7,6 +7,7 @@ Add-route-address 123 2020-04-26 14:00 Friend-home PetachTikva Zabutinski 50
 Add-route-site 123 2020-04-26 19:00 TelAviv-Beach
 Add-sick-encounter 123 moshe moshe 050500500
 Add-sick-encounter 123 David David 052520540
+Show-stat sick, healed, isolated, sick-per-city
 Show-person 123
 Show-person-route 123
 Add-sick-encounter 123 Hello World 314-1592654
