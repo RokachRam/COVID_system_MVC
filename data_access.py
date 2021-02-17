@@ -65,6 +65,10 @@ class IDataAccess:
     def delete_test_by_test_id_and_lab_id(self,test_id:int,lab_id:int)-> bool:
         pass
 
+    @abstractmethod
+    def get_person_by_id(self, id: int) -> Person:
+        pass
+
 
 
 

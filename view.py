@@ -64,7 +64,7 @@ class Interface_View(ABC):
         pass
 
     @abstractmethod
-    def show_person(self, person_deatils:str):
+    def show_person(self, person_deatils:str, tests_details:list):
         """
             will display the person details and whether he is sick or not together with all his/her lab tests
         """
@@ -198,17 +198,15 @@ class ViewConsole(Interface_View):
             print("** END " + key + " **")
         pass
 
-    def show_person(self, person_deatils:str):
-        """
-            will display the person details and whether he is sick or not together with all his/her lab tests
-        """
+    def show_person(self, person_deatils:str, tests_details:list):
         print(person_deatils)
+        print("** Lab Result Begin **")
+        for test in tests_details:
+            print(test)
+        print("** Lab Result End **")
         pass
 
     def show_person_route(self, list_of_places:list):
-        """
-             will display person route
-        """
         for place in list_of_places:
             print(place)
         pass

@@ -73,13 +73,19 @@ class Controller:
                 result = self.show_stat(option[1:])
                 self.view.show_stat(result)
             elif option[0] == 'Show-person':
-                self.advanced_search()
+                string, tests = self.show_person(option[1:])
+                self.view.show_person(string, tests)
             elif option[0] == 'Show-person-route':
-                self.advanced_search()
+                list_of_sites = self.show_person_route(option[1:])
+                self.view.show_person_route(list_of_sites)
             elif option[0] == 'Show-sick':
-                self.advanced_search()
+                list_of_sick = self.show_sick()
+                self.view.show_sick(list_of_sick)
             elif option[0] == 'Show-isolated':
-                self.advanced_search()
+                list_of_isolated = self.show_isolated()
+                self.view.show_isolated(list_of_isolated)
+            elif option[0] == 'Show-help':
+                self.view.show_help()
             else:
                 failed_msg="unknown command"
 
@@ -202,6 +208,36 @@ class Controller:
                 stats_dict["sick-per-city"] = city_sick_dict
         return stats_dict
 
+    def show_person(self, args): #id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents, source-sick(0 if unknown) ** LAB RESULT BEGIN ** date labid testid result ** LAB RESULT END ** 
+        person = self.container.get_person_by_id(args[0])
+        test_list_of_person = [str(x.test_date.date) +" "+str(x.lab.lab_id)+" "+str(x.test_id)+" "+str(x.test_result) for x in self.container.read_list_of_tests() if x.id == args[0]]
+        string = str(person.id)+" "+person.firstName+" "+person.surName+" "+str(person.birthdate.date)+" "+person.phone+\
+        " "+person.mail+" "+person.home.city+" "+person.home.street+" "+str(person.home.number)+" "+str(person.home.apartment_number)+\
+            " "+str(person.home.house_residents)+" "+(person.infector.firstName if hasattr(person, "infector") else "0")
+        return string, test_list_of_person
+
+    def show_person_route(self, args):
+        sick_in_site = self.container.read_list_of_sick_in_site()
+        list_of_sites = []
+        for x in sick_in_site:
+            if (x.sick.id == args[0]):
+                list_of_sites.append(str(x.site.siteName))
+        return list_of_sites
+
+    def show_sick(self): # id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents, source-sick(0 if unknown)
+        list_of_sick = [str(x.id)+" "+x.firstName+" "+x.surName+" "+str(x.birthdate.date)+" "+x.phone+\
+        " "+x.mail+" "+x.home.city+" "+x.home.street+" "+str(x.home.number)+" "+str(x.home.apartment_number)+\
+            " "+str(x.home.house_residents)+" "+x.infector.firstName if hasattr(x, "infector") else "0" for x in self.container.read_list_of_patients() if x.sick == True]
+        return list_of_sick
+
+    def show_isolated(self): # id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents
+        time_now = datetime.datetime.now()
+        isolation_period = 14
+        isolated = [str(x.id)+" "+x.firstName+" "+x.surName+" "+str(x.birthdate.date)+" "+x.phone+\
+        " "+x.mail+" "+x.home.city+" "+x.home.street+" "+str(x.home.number)+" "+str(x.home.apartment_number)+\
+            " "+str(x.home.house_residents) for x in self.container.read_list_of_patients() if
+                    x.isolation_begin_date and (time_now - x.isolation_begin_date).days < isolation_period]
+        return isolated
 
     # def get_active_suspect(self) -> list:
     #     """
