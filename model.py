@@ -40,8 +40,6 @@ class Person:
     def send_to_isolation(self):
         self.isolation_begin_date = datetime.datetime.now()
 
-
-
 class Laboratory:
     #test_counter = 0
 

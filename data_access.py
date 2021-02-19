@@ -12,9 +12,11 @@ class IDataAccess:
     @abstractmethod
     def create_patient(self, phone, firstName, surName, id=None, birthdate:datetime=None,mail=None, city=None,street=None,num=None,apt_num=None,house_resdients=None, sick=None, interviewed=None, isolation_begin_date=None):
         pass
+
     @abstractmethod
     def create_sick_in_site(self,sick_id,site_name,date_in_site,city=None,street=None,number=None):
         pass
+
     @abstractmethod
     def create_sick_encounter(self,sick_id,first_name,last_name,phone):
         pass
@@ -33,12 +35,14 @@ class IDataAccess:
         return True if success, else False
         """
         pass
+
     @abstractmethod
     def read_list_of_tests(self):
         """
         return True if success, else False
         """
         pass
+
     @abstractmethod
     def update_test_result(self,test_id,lab_id,person_id,result_date:datetime,result:True):
         """
@@ -52,21 +56,28 @@ class IDataAccess:
         return True if success, else False
         """
         pass
+
     @abstractmethod
     def update_sick_encounter_details(self,encounter_id, person_id,first_name,sur_name,birth_date,phone,mail,city,street,number,apart_num,house_residents):
         """
         return True if success, else False
         """
         pass
+
     @abstractmethod
     def delete_patient_by_id(self, person_id) -> bool:
         pass
+
     @abstractmethod
     def delete_test_by_test_id_and_lab_id(self,test_id:int,lab_id:int)-> bool:
         pass
 
     @abstractmethod
     def get_person_by_id(self, id: int) -> Person:
+        pass
+
+    @abstractmethod
+    def read_list_of_sick(self):
         pass
 
 
@@ -113,9 +124,9 @@ class PythonDataAccess(IDataAccess):
         self.list_of_patients.append(sick_encounter)
         return True
 
-
     def create_test(self,test_id,lab_id,person_id,result_date:datetime,result:bool=None):
-        
+        isolation_period = 14
+        time_now = datetime.datetime.now()
         person=self.get_person_by_id(person_id)
         if not person:
             return False # person not found
@@ -157,10 +168,18 @@ class PythonDataAccess(IDataAccess):
         return False
         
     def update_sick_encounter_details(self,encounter_id, person_id,first_name,sur_name,birth_date,phone,mail,city,street,number,apart_num,house_residents):
-        if not self.get_suspect_by_encounter_id(encounter_id):
+        suspect = self.get_suspect_by_encounter_id(encounter_id)
+        if not suspect:
             return False # "encounter_id not found"
-        self.delete_patient_by_id(person_id)
-        self.create_patient(phone, first_name, sur_name, person_id,birth_date,mail, city,street,number,apart_num,house_residents)
+        self.list_of_patients.remove(suspect)
+        home = Home(city, street, number, apart_num, house_residents)
+        suspect.id = person_id
+        suspect.firstName = first_name
+        suspect.surName = sur_name
+        suspect.birthdate = birth_date
+        suspect.mail = mail
+        suspect.home = home
+        self.list_of_patients.append(suspect)
         return True
     
     def delete_patient_by_id(self, person_id) -> bool:
@@ -190,3 +209,17 @@ class PythonDataAccess(IDataAccess):
         for test in self.list_of_tests:
             if int(test.test_id) == test_id and int(test.lab_id) == lab_id:
                 return test
+
+    def read_list_of_sick(self):
+        list_of_sick =[]
+        for test in self.read_list_of_tests(): # this loop assures that if there's a new negative test for someone - he's not sick anymore
+            if test.test_result == True:
+                for test2 in self.read_list_of_tests():
+                    if (test.person.id == test2.person.id) and (test.result_date < test2.result_date) and (test2.test_result == False):
+                        break
+                    if test.person not in list_of_sick:
+                        list_of_sick.append(test.person)
+        for person in self.read_list_of_patients():  # deals with sick person who got inserted to the list of sick via 'create-sick'
+            if person.sick and (person not in list_of_sick):
+                list_of_sick.append(person)
+        return list_of_sick
