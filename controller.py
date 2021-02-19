@@ -8,7 +8,7 @@ debug = False
 if "-d" in sys.argv:
     debug = True
 
-
+isolation_period = 14 # how long a person needs to be isolated if one has been in contact with a COVID-sick person
 class Controller:
     def __init__(self, view: Interface_View,container:IDataAccess):
         self.view = view
@@ -21,14 +21,14 @@ class Controller:
         while True:
             # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
             if debug:
-                print("-- debug --")
+                print("-- START  debug --")
                 print("patients:")
                 pprint.pprint([vars(x) for x in self.container.read_list_of_patients()])
                 print("sick_in_site:")
                 pprint.pprint([vars(x) for x in self.container.read_list_of_sick_in_site()])
                 print("tests:",)
                 pprint.pprint([vars(x) for x in self.container.read_list_of_tests()])
-                print("-- debug --")
+                print("-- END debug --")
 
             option: list = self.view.get_option_input().split()
             failed_msg = None
@@ -83,11 +83,14 @@ class Controller:
                 self.view.show_sick(list_of_sick)
             elif option[0] == 'Show-isolated':
                 list_of_isolated = self.show_isolated()
-                self.view.show_isolated(list_of_isolated)
+                if list_of_isolated:
+                    self.view.show_isolated(list_of_isolated)
+                else:
+                    failed_msg="no isolated people found"
             elif option[0] == 'Show-help':
                 self.view.show_help()
             else:
-                failed_msg="unknown command"
+                failed_msg="UNKNOWN COMMAND:: "+option[0]
 
             if failed_msg:
                 self.view.operation_failed(failed_msg)
@@ -106,7 +109,10 @@ class Controller:
         house_num=args[8]
         aptmnt=args[9]
         house_res=args[10]
-        return self.container.create_patient(phone,firstname,lastname,id,birthdate,mail,city,street,house_num,aptmnt,house_res,sick=True)
+        pereson_created= self.container.create_patient(phone,firstname,lastname,id,birthdate,mail,city,street,house_num,aptmnt,house_res,sick=True)
+        self.list_of_new_patients.append(pereson_created)
+        return pereson_created
+         
 
     # args: ["id" "01/04/2020" "10:00" "sitename" optional: "city" "street" "number"]
     def add_route_site(self, args: list):
@@ -135,7 +141,7 @@ class Controller:
     # encounter-id, sick-id, sick-firstname, sick-lastname, firstname lastname phone
     def show_sick_encounter(self):
         list_to_return = []
-        suspects = [x for x in self.container.read_list_of_patients if x.id == None]
+        suspects = [x for x in self.container.read_list_of_patients() if x.id == None]
         for suspect in suspects:
             string = str(suspect.encounter_id) + " " + str(suspect.infector.id) + " " + suspect.infector.firstName +\
                 " " + suspect.infector.surName + " " + suspect.firstName + \
@@ -159,32 +165,31 @@ class Controller:
         house_res=args[11]
         return self.container.update_sick_encounter_details(encounter_id, sick_id,firstName,surName,birthdate,phone,mail,city,street,number,apt_num,house_res)
 
-    def update_lab_test(self, args: list):  # labid testid personid date result
-        test_id=args[1]
+    def update_lab_test(self, args: list): 
         lab_id=args[0]
+        test_id=args[1]
         person_id=args[2]
-        result_date=args[3]
-        result=args[4]
+        result_date=datetime.datetime.strptime(args[3], '%d-%m-%Y')
+        result=True if args[4]=='true' else False
         return self.container.update_test_result(test_id,lab_id,person_id,result_date,result)
 
-    def show_new_sick(self): # show in format "id", "firstname", "lastname", "birthdate", "phone", "mail", "city", "street", house-number, apartment, house-residents
+    def show_new_sick(self): 
         list_to_return = []
         for sick in self.list_of_new_patients:
-            string = str(sick.id) + " " + sick.firstName + " " + sick.surName +\
-                " " + str(sick.birthdate) + " " + sick.phone + \
-                " " + sick.mail + " " + sick.home.city + " " + sick.home.street + " " + str(sick.home.number) +\
-                str(sick.home.apartment_number) + " " + str(sick.home.house_residents)
+            string=params_to_string(sick.id,sick.firstName,sick.surName,str(sick.birthdate.date()),sick.phone,sick.mail,sick.home.city,sick.home.street,sick.home.number,\
+                sick.home.apartment_number,sick.home.house_residents)
             list_to_return.append(string)
+        self.list_of_new_patients.clear()
         return list_to_return
 
-    def show_stat(self, args:list): # args could be: sicks, healed, isolated, sick-per-city
+    def show_stat(self, args:list): 
         isolation_period = 14
         stats_dict = {}
         for arg in args:
             arg = arg.replace(",", "")
-            if arg == "sicks":
+            if arg == "sick":
                 sicks = [x for x in self.container.read_list_of_patients() if x.sick]
-                stats_dict["sicks"] = len(sicks)
+                stats_dict["sick"] = len(sicks)
             if arg == "healed":
                 not_sick = [x for x in self.container.read_list_of_patients() if not x.sick]
                 all_tests = self.container.read_list_of_tests()
@@ -208,39 +213,46 @@ class Controller:
                 stats_dict["sick-per-city"] = city_sick_dict
         return stats_dict
 
-    def show_person(self, args): #id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents, source-sick(0 if unknown) ** LAB RESULT BEGIN ** date labid testid result ** LAB RESULT END ** 
+    def show_person(self, args): 
         person = self.container.get_person_by_id(args[0])
         test_list_of_person = [str(x.test_date.date) +" "+str(x.lab.lab_id)+" "+str(x.test_id)+" "+str(x.test_result) for x in self.container.read_list_of_tests() if x.id == args[0]]
-        string = str(person.id)+" "+person.firstName+" "+person.surName+" "+str(person.birthdate.date)+" "+person.phone+\
-        " "+person.mail+" "+person.home.city+" "+person.home.street+" "+str(person.home.number)+" "+str(person.home.apartment_number)+\
-            " "+str(person.home.house_residents)+" "+(person.infector.firstName if hasattr(person, "infector") else "0")
-        return string, test_list_of_person
+        person_string=params_to_string( person.id,person.firstName,person.surName,str(person.birthdate.date()),\
+                                        person.phone,person.mail,person.home.city,person.home.street,person.home.number,\
+                                        person.home.apartment_number,person.home.house_residents,(person.infector.firstName if hasattr(person, "infector") else "0" ))
+        return person_string, test_list_of_person
 
     def show_person_route(self, args):
         sick_in_site = self.container.read_list_of_sick_in_site()
         list_of_sites = []
         for x in sick_in_site:
             if (x.sick.id == args[0]):
-                list_of_sites.append(str(x.site.siteName))
+                list_of_sites.append(x.site.siteName+(' '+x.site.siteAddress.city if x.site.siteAddress else ''))
         return list_of_sites
 
-    def show_sick(self): # id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents, source-sick(0 if unknown)
-        list_of_sick = [str(x.id)+" "+x.firstName+" "+x.surName+" "+str(x.birthdate.date)+" "+x.phone+\
-        " "+x.mail+" "+x.home.city+" "+x.home.street+" "+str(x.home.number)+" "+str(x.home.apartment_number)+\
-            " "+str(x.home.house_residents)+" "+x.infector.firstName if hasattr(x, "infector") else "0" for x in self.container.read_list_of_patients() if x.sick == True]
-        return list_of_sick
+    def show_sick(self): 
+        sick_print_list=[]
+        for sick in self.container.read_list_of_patients():
+            if sick.sick:
+                person_string=params_to_string(sick.id,sick.firstName,sick.surName,str(sick.birthdate.date()),sick.phone,sick.mail,sick.home.city,sick.home.street,sick.home.number,\
+                    sick.home.apartment_number,sick.home.house_residents,(sick.infector.firstName if hasattr(sick, "infector") else "0" ))
+                sick_print_list.append(person_string)
+        return sick_print_list
 
-    def show_isolated(self): # id, firstname, lastname, birthdate, phone, mail, city, street, house-number, apartment, house-residents
+    def show_isolated(self): 
         time_now = datetime.datetime.now()
-        isolation_period = 14
-        isolated = [str(x.id)+" "+x.firstName+" "+x.surName+" "+str(x.birthdate.date)+" "+x.phone+\
-        " "+x.mail+" "+x.home.city+" "+x.home.street+" "+str(x.home.number)+" "+str(x.home.apartment_number)+\
-            " "+str(x.home.house_residents) for x in self.container.read_list_of_patients() if
-                    x.isolation_begin_date and (time_now - x.isolation_begin_date).days < isolation_period]
+        isolated = []
+        for sick in self.container.read_list_of_patients():
+            if sick.isolation_begin_date and (time_now - sick.isolation_begin_date).days < isolation_period:
+                id= (str(sick.id) if sick.id else 'NO-ID')
+                bday=str(sick.birthdate.date()) if sick.birthdate else ''
+                if sick.mail: # if was 'interviewd' and details were updated by a nurse
+                    interviewd_details=[sick.mail,sick.home.city,sick.home.street,sick.home.number,sick.home.apartment_number,str(sick.home.house_residents)]
+                    person_string=params_to_string(id,sick.firstName,sick.surName,bday,sick.phone,sick.mail,sick.home.city,sick.home.street,sick.home.number,sick.home.apartment_number,str(sick.home.house_residents))
+                else:
+                    person_string=params_to_string(id,sick.firstName,sick.surName,bday,sick.phone)
+                isolated.append(person_string) # seperate by space
         return isolated
 
-    # def get_active_suspect(self) -> list:
-    #     """
-    #     :return: a list of suspects who had no tests
-    #     """
-    #     return [x for x in self.container.read_list_of_patients if x.sick is None]
+def params_to_string(id,first_name,sur_name,birthdate,phone,mail='',city='',street='',house_number='',apt_num='',house_residents='',source_sick=''):
+    string_list=[str(id),first_name,sur_name,birthdate,phone,mail,city,street,str(house_number),str(apt_num),str(house_residents),source_sick]
+    return " ".join(string_list) # return a string seperated by spaces

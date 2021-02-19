@@ -87,7 +87,7 @@ class PythonDataAccess(IDataAccess):
         home=Home(city,street,num,apt_num,house_resdients)
         person=Person(phone, firstName, surName, id, birthdate,mail, home, sick, interviewed, isolation_begin_date)
         self.list_of_patients.append(person)
-        return True
+        return person
         
     def create_sick_in_site(self,sick_id,site_name,date_in_site,city=None,street=None,number=None):
         sick_person=self.get_person_by_id(sick_id)
@@ -106,16 +106,28 @@ class PythonDataAccess(IDataAccess):
         return True
     
     def create_sick_encounter(self,sick_id,first_name,last_name,phone):
-        if not self.get_person_by_id(sick_id):
+        infector=self.get_person_by_id(sick_id)
+        if not infector:
             return False # sick not found
-        self.create_patient(phone,first_name,last_name)
+        sick_encounter=Suspect(infector,phone,first_name,last_name)
+        self.list_of_patients.append(sick_encounter)
         return True
 
-    def create_test(self,test:Test):
-        if isinstance(test,Test):
-            self.list_of_tests.append(test)
-            return True
-        return False
+
+    def create_test(self,test_id,lab_id,person_id,result_date:datetime,result:bool=None):
+        
+        person=self.get_person_by_id(person_id)
+        if not person:
+            return False # person not found
+    
+        test=Test(person,Laboratory(lab_id),test_id,result_date,result)
+        # update person isolation date if neccesary
+        if result and (not person.isolation_begin_date or result_date>person.isolation_begin_date): # if result is positive AND (current isolatin date > result date OR doesnt have an isolation date)
+            person.isolation_begin_date=result_date
+            self.update_patient(person)
+        ##
+        self.list_of_tests.append(test)
+        return test
 
     def read_list_of_patients(self):
         return self.list_of_patients
@@ -126,13 +138,14 @@ class PythonDataAccess(IDataAccess):
     def read_list_of_tests(self):
         return self.list_of_tests
 
-    def update_test_result(self,test_id,lab_id,person_id,result_date:datetime,result:True):
+    def update_test_result(self,test_id,lab_id,person_id,result_date:datetime,result:bool):
+
         for lab_test in self.list_of_tests:
-            if (lab_test.test_id == test_id and lab_test.lab.lab_id == lab_id and lab_test.person.id == person_id):
+            if (lab_test.test_id == test_id and lab_test.lab.lab_id == lab_id and lab_test.person.id == person_id): # if exists
                 self.delete_test_by_test_id_and_lab_id(lab_test.test_id,lab_test.lab.lab_id)
                 lab_test.result_date=result_date
                 lab_test.test_result=result
-                return self.create_test(lab_test)
+        return self.create_test(test_id,lab_id,person_id,result_date,result)
 
     def update_patient(self,person:Person):
         person_id=person.id
@@ -145,9 +158,9 @@ class PythonDataAccess(IDataAccess):
         
     def update_sick_encounter_details(self,encounter_id, person_id,first_name,sur_name,birth_date,phone,mail,city,street,number,apart_num,house_residents):
         if not self.get_suspect_by_encounter_id(encounter_id):
-            return False
-        self.container.delete_patient_by_id(person_id)
-        self.create_patient(self, phone, first_name, sur_name, person_id,birth_date,mail, city,street,number,apart_num,house_residents)
+            return False # "encounter_id not found"
+        self.delete_patient_by_id(person_id)
+        self.create_patient(phone, first_name, sur_name, person_id,birth_date,mail, city,street,number,apart_num,house_residents)
         return True
     
     def delete_patient_by_id(self, person_id) -> bool:
@@ -164,16 +177,16 @@ class PythonDataAccess(IDataAccess):
 
     def get_person_by_id(self, id: int) -> Person:
         for person in self.list_of_patients:
-            if id == person.id:
+            if person.id and int(id) == int(person.id):
                 return person
 
     def get_suspect_by_encounter_id(self, encounter_id: int) -> Suspect:
         for suspect in self.list_of_patients:
             if hasattr(suspect, 'encounter_id'):
-                if suspect.encounter_id == encounter_id:
+                if (int(suspect.encounter_id) == int(encounter_id)):
                     return suspect
 
     def get_test_by_test_id_and_lab_id(self,test_id:int,lab_id:int):
         for test in self.list_of_tests:
-            if test.test_id == test_id and test.lab_id == lab_id:
+            if int(test.test_id) == test_id and int(test.lab_id) == lab_id:
                 return test

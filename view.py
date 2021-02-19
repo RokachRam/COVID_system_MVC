@@ -142,7 +142,11 @@ class ViewConsole(Interface_View):
         """
         האפליקציה אותה תכתבו צריכה לאפשר עבודה בעזרת קבלת קובץ פקודות (כל שורה בקובץ תהווה פקודה, תיאור ומבנה הפקודות:
         """
-        command=next(self.commands)
+        
+        try:
+            command=next(self.commands)
+        except Exception:
+            exit("$#$# END OF INPUT COMMANDS FILE")
         print('$#$# COMMAND:',command)
         return command
 
@@ -187,8 +191,11 @@ class ViewConsole(Interface_View):
         pass
 
     def show_new_sick(self, list_of_sick:list):
+        if not list_of_sick:
+            print("no new sick since last run of this command")
         for sick in list_of_sick:
             print(sick)
+
         pass
 
     def show_stat(self, stat_dict:dict):

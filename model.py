@@ -43,23 +43,21 @@ class Person:
 
 
 class Laboratory:
-    class_counter = 0
-    test_counter = 0
+    #test_counter = 0
 
-    def __init__(self):
-        self.lab_id = Laboratory.class_counter
-        Laboratory.class_counter += 1
+    def __init__(self,lab_id):
+        self.lab_id = lab_id
 
 
 class Test:
-    def __init__(self, person: Person, lab: Laboratory, test_date: datetime, result_date: datetime = None,
-                 test_result: bool = None):
+    def __init__(self, person: Person, lab: Laboratory,test_id, result_date: datetime = None,
+                 test_result: bool = None, test_date: datetime=None):
 
         self.test_result = test_result
         self.person = person
         self.lab = lab
-        lab.test_counter +=1
-        self.test_id = lab.test_counter
+        # lab.test_counter +=1
+        self.test_id = test_id
         self.test_date = test_date
         self.result_date = result_date
 
@@ -71,7 +69,7 @@ class Test:
 class Suspect(Person):
     class_counter = 0
     def __init__(self, infector: Person, phone: str, firstName: str, surName: str):
-        super().__init__(phone, firstName, surName)  # calling base class constructor
+        super().__init__(phone, firstName, surName,isolation_begin_date=datetime.datetime.now())  # calling base class constructor and updating isolation date
         self.encounter_id = Suspect.class_counter
         Suspect.class_counter += 1
         self.infector = infector
