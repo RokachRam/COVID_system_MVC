@@ -23,9 +23,9 @@ class Site:
 
 class Person:
     def __init__(self, phone: str, firstName: str, surName: str, id: int = None, birthdate: datetime = None,
-                 mail: str = None, home: Home = None, sick: bool = None, interviewed:bool = False,
+                 mail: str = None, home: Home = None, sick: bool = None, 
                  isolation_begin_date: datetime = None) -> None:
-        self.phone = phone  # key value
+        self.phone = phone 
         self.firstName = firstName
         self.surName = surName
         self.id = id
@@ -33,7 +33,6 @@ class Person:
         self.mail = mail
         self.home = home
         self.sick = sick
-        self.interviewed = interviewed
         self.isolation_begin_date = isolation_begin_date
         pass
 

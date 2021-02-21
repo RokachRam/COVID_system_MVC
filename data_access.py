@@ -10,7 +10,7 @@ class IDataAccess:
     it can be implemented using different databases (python,MySQL, MSSQL,etc..)
     """
     @abstractmethod
-    def create_patient(self, phone, firstName, surName, id=None, birthdate:datetime=None,mail=None, city=None,street=None,num=None,apt_num=None,house_resdients=None, sick=None, interviewed=None, isolation_begin_date=None):
+    def create_patient(self, phone, firstName, surName, id=None, birthdate:datetime=None,mail=None, city=None,street=None,num=None,apt_num=None,house_resdients=None, sick=None,  isolation_begin_date=None):
         pass
 
     @abstractmethod
@@ -93,10 +93,10 @@ class PythonDataAccess(IDataAccess):
         self.list_of_tests : List[Test]=[]
     
     
-    def create_patient(self, phone, firstName, surName, id=None, birthdate:datetime=None,mail=None, city=None,street=None,num=None,apt_num=None,house_resdients=None, sick=None, interviewed=None, isolation_begin_date=None):
+    def create_patient(self, phone, firstName, surName, id=None, birthdate:datetime=None,mail=None, city=None,street=None,num=None,apt_num=None,house_resdients=None, sick=None,  isolation_begin_date=None):
         self.delete_patient_by_id(id)
         home=Home(city,street,num,apt_num,house_resdients)
-        person=Person(phone, firstName, surName, id, birthdate,mail, home, sick, interviewed, isolation_begin_date)
+        person=Person(phone, firstName, surName, id, birthdate,mail, home, sick, isolation_begin_date)
         self.list_of_patients.append(person)
         return person
         
@@ -114,7 +114,7 @@ class PythonDataAccess(IDataAccess):
         
         route_site = SickInSite(sick_person, site, date_in_site)
         self.list_of_sick_in_Site.append(route_site)
-        return True
+        return route_site
     
     def create_sick_encounter(self,sick_id,first_name,last_name,phone):
         infector=self.get_person_by_id(sick_id)
@@ -122,7 +122,7 @@ class PythonDataAccess(IDataAccess):
             return False # sick not found
         sick_encounter=Suspect(infector,phone,first_name,last_name)
         self.list_of_patients.append(sick_encounter)
-        return True
+        return sick_encounter
 
     def create_test(self,test_id,lab_id,person_id,result_date:datetime,result:bool=None):
         isolation_period = 14
@@ -171,6 +171,7 @@ class PythonDataAccess(IDataAccess):
         suspect = self.get_suspect_by_encounter_id(encounter_id)
         if not suspect:
             return False # "encounter_id not found"
+        suspect2=suspect
         self.list_of_patients.remove(suspect)
         home = Home(city, street, number, apart_num, house_residents)
         suspect.id = person_id
@@ -180,7 +181,7 @@ class PythonDataAccess(IDataAccess):
         suspect.mail = mail
         suspect.home = home
         self.list_of_patients.append(suspect)
-        return True
+        return suspect
     
     def delete_patient_by_id(self, person_id) -> bool:
         for person in self.list_of_patients:
