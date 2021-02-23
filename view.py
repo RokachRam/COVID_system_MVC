@@ -211,7 +211,7 @@ class ViewConsole(Interface_View):
         for test in tests_details:
             print("** Lab Result Begin **")
             print(test)
-            print("** Lab Result End **")
+            print("** Lab Result End **\n")
 
         pass
 

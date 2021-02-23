@@ -59,5 +59,30 @@ class TestDataAccess(unittest.TestCase):
         print(updated_person,list_of_patients)
         self.assertTrue(updated_person in list_of_patients)
 
+    def test_delete_patient_by_id(self):
+        data_access=PythonDataAccess()
+        person=data_access.create_patient("052222222", "firstName", "surName", 1, datetime.datetime.now(),"e@.com", "Gaza","Gaz",14,14,102, True,  datetime.datetime.now())
+        data_access.delete_patient_by_id(1)
+        self.assertTrue(person not in data_access.read_list_of_patients())
+
+    def test_delete_test_by_test_id_and_lab_id(self):
+        data_access=PythonDataAccess()
+        data_access.create_patient("052222222", "firstName", "surName", 1, datetime.datetime.now(),"e@.com", "Gaza","Gaz",14,14,102, True,  datetime.datetime.now())
+        data_access.create_test(3,4,1,datetime.datetime.now())
+        self.assertTrue(data_access.delete_test_by_test_id_and_lab_id(3,4))
+
+    def test_create_test(self):
+        data_access=PythonDataAccess()
+        data_access.create_patient("052222222", "firstName", "surName", 1, datetime.datetime.now(),"e@.com", "Gaza","Gaz",14,14,102, True,  datetime.datetime.now())
+        test=data_access.create_test(3,4,1,datetime.datetime.now())
+        self.assertTrue(test in data_access.read_list_of_tests())
+
+    def test_create_test_with_no_existing_person(self):
+        data_access=PythonDataAccess()
+        test=data_access.create_test(3,4,1,datetime.datetime.now()) 
+        self.assertFalse(test in data_access.read_list_of_tests())
+
+
+
 if __name__ == '__main__':
     unittest.main()

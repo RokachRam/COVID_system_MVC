@@ -48,13 +48,12 @@ class Laboratory:
 
 class Test:
     def __init__(self, person: Person, lab: Laboratory,test_id, result_date: datetime = None,
-                 test_result: bool = None, test_date: datetime=None):
+                 test_result: bool = None):
 
         self.test_result = test_result
         self.person = person
         self.lab = lab
         self.test_id = test_id
-        self.test_date = test_date
         self.result_date = result_date
 
     def update_test_result(self, test_result: bool, result_date: datetime = datetime.datetime.now()):

@@ -236,7 +236,7 @@ class Controller:
 
     def show_person(self, args): 
         person = self.container.get_person_by_id(args[0])
-        test_list_of_person = [str(x.test_date.date) +" "+str(x.lab.lab_id)+" "+str(x.test_id)+" "+str(x.test_result) for x in self.container.read_list_of_tests() if x.id == args[0]]
+        test_list_of_person = [str(x.result_date.date()) +" "+str(x.lab.lab_id)+" "+str(x.test_id)+" "+str(x.test_result) for x in self.container.read_list_of_tests() if x.person.id == args[0]]
         person_string=params_to_string( person.id,person.firstName,person.surName,str(person.birthdate.date()),\
                                         person.phone,person.mail,person.home.city,person.home.street,person.home.number,\
                                         person.home.apartment_number,person.home.house_residents,(person.infector.firstName if hasattr(person, "infector") else "0" ))
