@@ -171,7 +171,6 @@ class PythonDataAccess(IDataAccess):
         suspect = self.get_suspect_by_encounter_id(encounter_id)
         if not suspect:
             return False # "encounter_id not found"
-        suspect2=suspect
         self.list_of_patients.remove(suspect)
         home = Home(city, street, number, apart_num, house_residents)
         suspect.id = person_id
@@ -181,6 +180,7 @@ class PythonDataAccess(IDataAccess):
         suspect.mail = mail
         suspect.home = home
         self.list_of_patients.append(suspect)
+        
         return suspect
     
     def delete_patient_by_id(self, person_id) -> bool:

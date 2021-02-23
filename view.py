@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import datetime
 import pprint
 
 class Interface_View(ABC):
@@ -199,6 +198,8 @@ class ViewConsole(Interface_View):
         pass
 
     def show_stat(self, stat_dict:dict):
+        if not stat_dict:
+            print("no stats to show")
         for key in stat_dict:
             print("** BEGIN "  + key + " **")
             pprint.pprint(stat_dict[key])
@@ -207,18 +208,21 @@ class ViewConsole(Interface_View):
 
     def show_person(self, person_deatils:str, tests_details:list):
         print(person_deatils)
-        print("** Lab Result Begin **")
         for test in tests_details:
+            print("** Lab Result Begin **")
             print(test)
-        print("** Lab Result End **")
+            print("** Lab Result End **")
+
         pass
 
     def show_person_route(self, list_of_places:list):
+        if not list_of_places:
+            print("this person has no route in the system")
         for place in list_of_places:
             print(place)
         pass
 
     def operation_failed(self, msg: str):
-        print(msg)
+        print("[FAILED]:"+msg)
         pass
 

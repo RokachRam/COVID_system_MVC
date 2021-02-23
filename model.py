@@ -53,7 +53,6 @@ class Test:
         self.test_result = test_result
         self.person = person
         self.lab = lab
-        # lab.test_counter +=1
         self.test_id = test_id
         self.test_date = test_date
         self.result_date = result_date
@@ -80,9 +79,6 @@ class Suspect(Person):
         self.sick = sick
         self.isolation_begin_date = isolation_begin_date
 
-    def is_suspect_infected_by_someone(self):
-        return self.sick # a suspect is a suspect because a sick person potentially infected him, if he got sick -
-                         # it's because of him
 
 
 class SickInSite:

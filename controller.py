@@ -14,12 +14,10 @@ class Controller:
         self.view = view
         self.container=container # can be a DB, can be pythonish, can be anything. must support all IDataAccess functions
         self.list_of_new_patients: List[Person]= []
-        
         pass
 
     def start(self):
         while True:
-            # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
             if debug:
                 print("-- START  debug --")
                 print("patients:")
@@ -30,7 +28,7 @@ class Controller:
                 pprint.pprint([vars(x) for x in self.container.read_list_of_tests()])
                 print("-- END debug --")
 
-            option: list = self.view.get_option_input().split()
+            option: list = self.view.get_option_input().split() # makes a list of input args, for ex: # ["Create-sick" "id" "firstname" "lastname" "birthdate" "phone" "mail" "city" "street" "house-number" "apartment" "house-residents"]
             failed_msg = None
             if not option:
                 failed_msg='no command inserted'
@@ -39,54 +37,76 @@ class Controller:
             if option[0] == 'Create-sick':
                 result=self.create_sick(option[1:])
                 if not result:
-                    failed_msg="create sick failed"
+                    failed_msg="Create-sick failed"
                 else:
                     self.view.create_sick()
             elif option[0] == 'Add-route-site':
-                self.add_route_site(option[1:])
-                self.view.add_route_site()
+                if self.add_route_site(option[1:]):
+                    self.view.add_route_site()
+                else:
+                    failed_msg="Add-route-site failed"
             elif option[0] == 'Add-route-address':
-                self.add_route_site(option[1:])
-                self.view.add_route_address()
+                if self.add_route_site(option[1:]):
+                    self.view.add_route_address()
+                else:
+                    failed_msg="Add-route-address failed"
             elif option[0] == 'Add-sick-encounter':
                 if self.add_sick_encounter(option[1:]):
                     self.view.add_sick_encounter()
                 else:
-                    failed_msg="No infector \ wrong encounter details"
+                    failed_msg="Add-sick-encounter failed: no infector found or wrong encounter details"
             elif option[0] == 'Show-sick-encounter':
                 result = self.show_sick_encounter()
-                self.view.show_sick_encounter(result)
+                if result:
+                    self.view.show_sick_encounter(result)
+                else:
+                    failed_msg="Show-sick-encounter failed"
             elif option[0] == 'Update-sick-encounter-details':
                 if self.update_sick_encounter_details(option[1:]):
                     self.view.update_sick_encounter_details()
                 else:
-                    failed_msg = "There is no such encounter / missing details"
+                    failed_msg = "Update-sick-encounter-details failed: there is no such encounter or missing details"
             elif option[0] == 'Update-lab-test':
                 if self.update_lab_test(option[1:]):
                     self.view.update_lab_test()
                 else:
-                    failed_msg = "No such test / missing details"
+                    failed_msg = "Update-lab-test failed: No such test or missing details"
             elif option[0] == 'Show-new-sick':
                 result = self.show_new_sick()
-                self.view.show_new_sick(result)
+                if result:
+                    self.view.show_new_sick(result)
+                else:
+                    failed_msg="Show-new-sick failed"
             elif option[0] == 'Show-stat':
                 result = self.show_stat(option[1:])
-                self.view.show_stat(result)
+                if result:
+                    self.view.show_stat(result)
+                else:
+                    failed_msg="Show-stat failed"
             elif option[0] == 'Show-person':
                 string, tests = self.show_person(option[1:])
-                self.view.show_person(string, tests)
+                if string:
+                    self.view.show_person(string, tests)
+                else:
+                    failed_msg="Show-stat failed"
             elif option[0] == 'Show-person-route':
                 list_of_sites = self.show_person_route(option[1:])
-                self.view.show_person_route(list_of_sites)
+                if list_of_sites:
+                    self.view.show_person_route(list_of_sites)
+                else:
+                    failed_msg="Show-person-route failed"
             elif option[0] == 'Show-sick':
                 list_of_sick = self.show_sick()
-                self.view.show_sick(list_of_sick)
+                if list_of_sick:
+                    self.view.show_sick(list_of_sick)
+                else:
+                    failed_msg="Show-sick failed"
             elif option[0] == 'Show-isolated':
                 list_of_isolated = self.show_isolated()
                 if list_of_isolated:
                     self.view.show_isolated(list_of_isolated)
                 else:
-                    failed_msg="no isolated people found"
+                    failed_msg="Show-isolated failed: no isolated people found"
             elif option[0] == 'Show-help':
                 self.view.show_help()
             else:
@@ -124,7 +144,7 @@ class Controller:
         city=None
         street=None
         number=None
-        if len(args) > 4:
+        if len(args) > 4: # add_route_address
             city=args[4]
             street=args[5]
             number=args[6]
