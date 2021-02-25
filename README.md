@@ -1,5 +1,11 @@
 # COVID_system_MVC
-Designed and Implemented in Python by Ram Rokach and Eden Nathan.
+This system was built to assist nurses and laborants by manipulating and controlling COVID-19's: {Sick, Sick-Encounters and Tests}.
+Main funcionallity:
+    1.The nurse can add sick people to the system, as well as sick encounters.
+    2.The laborant can update test results and assosiate it to a person.
+    3.Every system user can view sick, isolated, healed, and sick-per-city statistics.
+
+The system was designed and implemented in Python by Ram Rokach and Eden Nathan in 2021.
 # MVC
 This project was implemented with the MVC design-artitechtual pattern:
     1. M - Model: holds entity classes.
@@ -9,6 +15,9 @@ This way we accmoplished a loosly-coupled and generic design for our system. Thi
 # Data Access Layer
 This project was implemented with the Data Access Layer approach:
 In order to seperate our data-management from our business-logic(Controller) and presentation code (View), we use DAL - this way, if we have to change data stores, we don't end up rewriting the whole system. For example, in order to change the Data-Management system from Python lists to MySQL, all we need to do is to implement the DAL interface as a MySql class and change the main function.
+
+# How to run?
+Run the main file from the CLI, and give it a commands-file.txt (see HelpTest.txt for example): python main.py HelpTest.txt
 
 # UML
 
