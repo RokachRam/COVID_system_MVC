@@ -8,9 +8,9 @@ Main funcionallity:
 The system was designed and implemented in Python by Ram Rokach and Eden Nathan in 2021.
 # MVC
 This project was implemented with the MVC design-artitechtual pattern:
-    1. M - Model: holds entity classes.
-    2. V - View: holds the "UI" implementation.
-    3. C - Controller: responsible of organizing and manipulating command flow.
+   ##  M - Model: holds entity classes.
+   ##  V - View: holds the "UI" implementation.
+   ##  C - Controller: responsible of organizing and manipulating command flow.
 This way we accmoplished a loosly-coupled and generic design for our system. This means we gain minimum dependency between the components. It allows fast-modification of one of the components with minimum changes on other components.For example, in order to change the View from Console to Web-App, all there's to do is to implement the View-Interface functions with a web app and change the main function. 
 # Data Access Layer
 This project was implemented with the Data Access Layer approach:
