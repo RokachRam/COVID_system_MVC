@@ -10,4 +10,7 @@ This way we accmoplished a loosly-coupled and generic design for our system. Thi
 This project was implemented with the Data Access Layer approach:
 In order to seperate our data-management from our business-logic(Controller) and presentation code (View), we use DAL - this way, if we have to change data stores, we don't end up rewriting the whole system. For example, in order to change the Data-Management system from Python lists to MySQL, all we need to do is to implement the DAL interface as a MySql class and change the main function.
 
+# UML
+
+![UML](https://github.com/[username]/[reponame]/blob/[branch]/image.jpg?raw=true)
 
