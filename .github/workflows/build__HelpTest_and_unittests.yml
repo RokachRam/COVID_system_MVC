@@ -1,0 +1,23 @@
+name: COVID-19 system build
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.x
+      uses: actions/setup-python@v2
+      with:
+        # Semantic version range syntax or exact version of a Python version
+        python-version: '3.x'
+        # Optional - x64 or x86 architecture, defaults to x64
+        architecture: 'x64'
+    # You can test your matrix by printing the current Python version
+    - name: Run HelpTest.txt
+      run: python src/main.py HelpTest.txt
+    - name: Run unit test
+      run: python tests/test_data_access.py
