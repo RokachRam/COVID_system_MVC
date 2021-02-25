@@ -76,7 +76,7 @@ class Controller:
                 if result:
                     self.view.show_new_sick(result)
                 else:
-                    failed_msg="Show-new-sick failed"
+                    failed_msg="Show-new-sick: no new sick people"
             elif option[0] == 'Show-stat':
                 result = self.show_stat(option[1:])
                 if result:

@@ -22,10 +22,6 @@ class IDataAccess:
         pass
     
     @abstractmethod
-    def create_test(self,test:Test):
-        pass
-
-    @abstractmethod
     def read_list_of_patients(self):
         pass
 
@@ -35,7 +31,10 @@ class IDataAccess:
         return True if success, else False
         """
         pass
-
+    @abstractmethod
+    def get_test_by_test_id_and_lab_id(self,test_id:int,lab_id:int):
+        pass
+    
     @abstractmethod
     def read_list_of_tests(self):
         """
@@ -124,7 +123,17 @@ class PythonDataAccess(IDataAccess):
         self.list_of_patients.append(sick_encounter)
         return sick_encounter
 
-    def create_test(self,test_id,lab_id,person_id,result_date:datetime,result:bool=None):
+
+    def read_list_of_patients(self):
+        return self.list_of_patients
+
+    def read_list_of_sick_in_site(self):
+        return self.list_of_sick_in_Site
+
+    def read_list_of_tests(self):
+        return self.list_of_tests
+
+    def update_test_result(self,test_id,lab_id,person_id,result_date:datetime,result:bool):
         isolation_period = 14
         time_now = datetime.datetime.now()
         person=self.get_person_by_id(person_id)
@@ -139,18 +148,6 @@ class PythonDataAccess(IDataAccess):
         ##
         self.list_of_tests.append(test)
         return test
-
-    def read_list_of_patients(self):
-        return self.list_of_patients
-
-    def read_list_of_sick_in_site(self):
-        return self.list_of_sick_in_Site
-
-    def read_list_of_tests(self):
-        return self.list_of_tests
-
-    def update_test_result(self,test_id,lab_id,person_id,result_date:datetime,result:bool):
-        return self.create_test(test_id,lab_id,person_id,result_date,result)
 
     def update_patient(self,person:Person):
         person_id=person.id
