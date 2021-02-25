@@ -1,0 +1,23 @@
+trigger:
+  branches:
+    include:
+    - main
+stages:
+- stage: __default
+  jobs:
+  - job: Job
+    pool:
+      vmImage: ubuntu-latest
+    steps:
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: '3.6'
+    - task: CmdLine@2
+      displayName: 'Run HelpTest.txt'
+      inputs:
+        script: python src/main.py HelpTest.txt
+    - task: CmdLine@2
+      displayName: 'Run unit tests'
+      inputs:
+        script: python tests/test_data_access.py
+

@@ -145,7 +145,8 @@ class ViewConsole(Interface_View):
         try:
             command=next(self.commands)
         except Exception:
-            exit("$#$# END OF INPUT COMMANDS FILE")
+            print("$#$# END OF INPUT COMMANDS FILE")
+            exit(0)
         print('$#$# COMMAND:',command)
         return command
 
