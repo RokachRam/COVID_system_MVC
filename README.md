@@ -12,5 +12,5 @@ In order to seperate our data-management from our business-logic(Controller) and
 
 # UML
 
-![UML](https://github.com/[dndn10]/[COVID_system_MVC]/blob/main/githubUmlPic.png?raw=true)
+![UML](https://github.com/dndn10/COVID_system_MVC/blob/main/githubUmlPic.png?raw=true)
 
