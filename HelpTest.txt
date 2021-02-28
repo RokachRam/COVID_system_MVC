@@ -7,13 +7,12 @@ Add-route-address 123 2020-04-26 14:00 Friend-home PetachTikva Zabutinski 50
 Add-route-site 123 2020-04-26 19:00 TelAviv-Beach
 Add-sick-encounter 123 moshe moshe 050500500
 Add-sick-encounter 123 David David 052520540
-Show-stat sick, healed, isolated, sick-per-city
 Show-person 123
 Show-person-route 123
 Add-sick-encounter 123 Hello World 314-1592654
 Show-sick-encounter
 Update-sick-encounter-details 0 777 Hello World 2020-04-29 314-1592654 encounter@corona.com Washington ThatStreet 3 4 5
-Update-lab-test 1 1 777 12-02-2021 true
+Update-lab-test 1 1 777 01-04-2020 true
 Show-sick
 Show-isolated
 Show-stat sick, healed, isolated, sick-per-city
